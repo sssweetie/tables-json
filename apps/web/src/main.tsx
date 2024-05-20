@@ -4,8 +4,8 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { Posts } from './features/Posts';
-import { Details } from './features/Details';
 import { EuiProvider } from '@elastic/eui';
+import { Details } from './pages/Details';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
