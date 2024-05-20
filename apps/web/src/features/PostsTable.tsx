@@ -9,7 +9,7 @@ import {
 
 import { FC, useState } from 'react';
 import { Post } from './Posts';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface PostsTableProps {
   posts: Post[];
@@ -20,6 +20,7 @@ type PostKeys = keyof Post;
 
 export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const sort = searchParams.get('sort') as PostKeys;
   const direction = searchParams.get('direction') as Direction;
 
@@ -88,6 +89,9 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
     return {
       'data-test-subj': `row-${id}`,
       className: 'customRowClass',
+      onClick: () => {
+        navigate(`/details/${id}`);
+      },
     };
   };
 

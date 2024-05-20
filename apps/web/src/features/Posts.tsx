@@ -1,4 +1,4 @@
-import { EuiButtonGroup, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import { useEffect, useState } from 'react';
 import { httpClient } from '../services/httpClient';
@@ -13,28 +13,26 @@ export interface Post {
   body: string;
 }
 
-export const Posts = () => {
-  const basicButtonGroupPrefix = useGeneratedHtmlId({
-    prefix: 'basicButtonGroup',
-  });
+const basicButtonGroupPrefix = 'basicButtonGroup';
 
+export const Posts = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const viewType = searchParams.get('viewType');
 
   const [toggleIdSelected, setToggleIdSelected] = useState(
-    viewType ?? `${basicButtonGroupPrefix}__0`
+    viewType ?? `${basicButtonGroupPrefix}0`
   );
 
   const [posts, setPosts] = useState<Post[]>([]);
 
   const toggleButtons = [
     {
-      id: `${basicButtonGroupPrefix}__0`,
+      id: `${basicButtonGroupPrefix}0`,
       label: 'JSON',
     },
     {
-      id: `${basicButtonGroupPrefix}__1`,
+      id: `${basicButtonGroupPrefix}1`,
       label: 'Tables',
     },
   ];
@@ -62,7 +60,7 @@ export const Posts = () => {
         onChange={onChange}
         options={toggleButtons}
       />
-      {toggleIdSelected === `${basicButtonGroupPrefix}__1` ? (
+      {toggleIdSelected === `${basicButtonGroupPrefix}1` ? (
         <PostsTable posts={posts} />
       ) : (
         <div>
