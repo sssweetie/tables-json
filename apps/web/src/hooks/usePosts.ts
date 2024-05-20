@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Post } from '../features/Posts';
+import { Post } from '../pages/Posts';
 import { httpClient } from '../services/httpClient';
 
 const basicButtonGroupPrefix = 'basicButtonGroup';
 
 export const usePosts = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const viewType = searchParams.get('viewType');
@@ -13,8 +15,6 @@ export const usePosts = () => {
   const [toggleIdSelected, setToggleIdSelected] = useState(
     viewType ?? `${basicButtonGroupPrefix}0`
   );
-
-  const [posts, setPosts] = useState<Post[]>([]);
 
   const toggleButtons = [
     {
@@ -35,8 +35,15 @@ export const usePosts = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await httpClient.get('/posts');
-      setPosts(res.data);
+      try {
+        setIsLoading(true);
+        const res = await httpClient.get('/posts');
+        setPosts(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -47,7 +54,7 @@ export const usePosts = () => {
     toggleButtons,
     toggleIdSelected,
     basicButtonGroupPrefix,
-
+    isLoading,
     onChange,
   };
 };

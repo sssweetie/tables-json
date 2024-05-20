@@ -1,7 +1,7 @@
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { FC } from 'react';
-import { Post } from './Posts';
+import { Post } from '../pages/Posts';
 import { usePostsTable } from '../hooks/usePostsTable';
 
 interface PostsTableProps {

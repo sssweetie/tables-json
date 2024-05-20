@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Post } from '../features/Posts';
+import { Post } from '../pages/Posts';
 import {
   Comparators,
   Criteria,
@@ -10,6 +10,14 @@ import {
 
 type Direction = 'asc' | 'desc';
 type PostKeys = keyof Post;
+
+interface FindUsers {
+  posts: Post[];
+  pageIndex: number;
+  pageSize: number;
+  sortField: PostKeys;
+  sortDirection: Direction;
+}
 
 export const usePostsTable = (posts: Post[]) => {
   const navigate = useNavigate();
@@ -25,8 +33,7 @@ export const usePostsTable = (posts: Post[]) => {
     direction ?? 'asc'
   );
 
-  const getRowProps = (post: Post) => {
-    const { id } = post;
+  const getRowProps = ({ id }: Post) => {
     return {
       'data-test-subj': `row-${id}`,
       className: 'customRowClass',
@@ -37,11 +44,9 @@ export const usePostsTable = (posts: Post[]) => {
   };
 
   const getCellProps = (
-    post: Post,
-    column: EuiTableFieldDataColumnType<Post>
+    { id }: Post,
+    { field }: EuiTableFieldDataColumnType<Post>
   ) => {
-    const { id } = post;
-    const { field } = column;
     return {
       className: 'customCellClass',
       'data-test-subj': `cell-${id}-${String(field)}`,
@@ -67,14 +72,15 @@ export const usePostsTable = (posts: Post[]) => {
     }
   };
 
-  const findUsers = (
-    posts: Post[],
-    pageIndex: number,
-    pageSize: number,
-    sortField: PostKeys,
-    sortDirection: 'asc' | 'desc'
-  ) => {
+  const findUsers = ({
+    posts,
+    pageIndex,
+    pageSize,
+    sortField,
+    sortDirection,
+  }: FindUsers) => {
     let items;
+    let pageOfItems;
 
     if (sortField) {
       items = posts
@@ -85,8 +91,6 @@ export const usePostsTable = (posts: Post[]) => {
     } else {
       items = posts;
     }
-
-    let pageOfItems;
 
     if (!pageIndex && !pageSize) {
       pageOfItems = items;
@@ -104,13 +108,15 @@ export const usePostsTable = (posts: Post[]) => {
     };
   };
 
-  const { pageOfItems, totalItemCount } = findUsers(
+  const findUsersParams: FindUsers = {
     posts,
     pageIndex,
     pageSize,
     sortField,
-    sortDirection
-  );
+    sortDirection,
+  };
+
+  const { pageOfItems, totalItemCount } = findUsers(findUsersParams);
 
   const pagination = {
     pageIndex,

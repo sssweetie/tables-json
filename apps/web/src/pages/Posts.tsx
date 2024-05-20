@@ -1,7 +1,9 @@
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiLoadingSpinner } from '@elastic/eui';
 
-import { PostsTable } from './PostsTable';
+import { PostsTable } from '../features/PostsTable';
 import { usePosts } from '../hooks/usePosts';
+import { LoadingWrapper } from './styled';
+import { Loader } from '../components/Loader';
 
 export interface Post {
   postId: number;
@@ -17,16 +19,31 @@ export const Posts = () => {
     toggleButtons,
     basicButtonGroupPrefix,
     posts,
+    isLoading,
     onChange,
   } = usePosts();
+
+  if (isLoading) {
+    return (
+      <>
+        <EuiButtonGroup
+          legend={'View display settings'}
+          idSelected={toggleIdSelected}
+          options={toggleButtons}
+          onChange={onChange}
+        />
+        <Loader />
+      </>
+    );
+  }
 
   return (
     <>
       <EuiButtonGroup
         legend={'View display settings'}
         idSelected={toggleIdSelected}
-        onChange={onChange}
         options={toggleButtons}
+        onChange={onChange}
       />
       {toggleIdSelected === `${basicButtonGroupPrefix}1` ? (
         <PostsTable posts={posts} />

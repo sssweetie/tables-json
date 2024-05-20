@@ -1,6 +1,6 @@
 import { Link, NavigateFunction } from 'react-router-dom';
 import * as S from './styled';
-import { Post } from './Posts';
+import { Post } from '../pages/Posts';
 import { FC } from 'react';
 
 interface PostDetailsProps {

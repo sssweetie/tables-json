@@ -3,7 +3,7 @@ import '@elastic/eui/dist/eui_theme_light.css';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { Posts } from './features/Posts';
+import { Posts } from './pages/Posts';
 import { EuiProvider } from '@elastic/eui';
 import { Details } from './pages/Details';
 
