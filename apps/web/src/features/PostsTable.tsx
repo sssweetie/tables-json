@@ -1,21 +1,34 @@
 import {
+  Comparators,
   Criteria,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
+  EuiTableSortingType,
 } from '@elastic/eui';
 
 import { FC, useState } from 'react';
 import { Post } from './Posts';
+import { useSearchParams } from 'react-router-dom';
 
 interface PostsTableProps {
   posts: Post[];
 }
 
+type Direction = 'asc' | 'desc';
+type PostKeys = keyof Post;
+
 export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sort = searchParams.get('sort') as PostKeys;
+  const direction = searchParams.get('direction') as Direction;
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [showPerPageOptions, setShowPerPageOptions] = useState(true);
+  const [sortField, setSortField] = useState<PostKeys>(sort ?? 'id');
+  const [sortDirection, setSortDirection] = useState<Direction>(
+    direction ?? 'asc'
+  );
 
   const columns: Array<EuiBasicTableColumn<Post>> = [
     {
@@ -26,6 +39,7 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
         truncateText: false,
         width: '100%',
       },
+      sortable: true,
     },
     {
       field: 'id',
@@ -35,6 +49,7 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
         truncateText: false,
         width: '100%',
       },
+      sortable: true,
     },
     {
       field: 'name',
@@ -44,6 +59,7 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
         truncateText: false,
         width: '100%',
       },
+      sortable: true,
     },
     {
       field: 'email',
@@ -53,6 +69,7 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
         truncateText: false,
         width: '100%',
       },
+      sortable: true,
     },
     {
       field: 'body',
@@ -62,6 +79,7 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
         truncateText: false,
         width: '100%',
       },
+      sortable: true,
     },
   ];
 
@@ -86,22 +104,50 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
     };
   };
 
-  const onTableChange = ({ page }: Criteria<Post>) => {
+  const onTableChange = ({ page, sort }: Criteria<Post>) => {
     if (page) {
       const { index: pageIndex, size: pageSize } = page;
       setPageIndex(pageIndex);
       setPageSize(pageSize);
     }
+    if (sort) {
+      const { field: sortField, direction: sortDirection } = sort;
+      setSortField(sortField);
+      setSortDirection(sortDirection);
+      setSearchParams({
+        ...Object.fromEntries([...searchParams]),
+        sort: sortField,
+        direction: sortDirection,
+      });
+    }
   };
 
-  const findUsers = (posts: Post[], pageIndex: number, pageSize: number) => {
+  const findUsers = (
+    posts: Post[],
+    pageIndex: number,
+    pageSize: number,
+    sortField: PostKeys,
+    sortDirection: 'asc' | 'desc'
+  ) => {
+    let items;
+
+    if (sortField) {
+      items = posts
+        .slice(0)
+        .sort(
+          Comparators.property(sortField, Comparators.default(sortDirection))
+        );
+    } else {
+      items = posts;
+    }
+
     let pageOfItems;
 
     if (!pageIndex && !pageSize) {
-      pageOfItems = posts;
+      pageOfItems = items;
     } else {
       const startIndex = pageIndex * pageSize;
-      pageOfItems = posts.slice(
+      pageOfItems = items.slice(
         startIndex,
         Math.min(startIndex + pageSize, posts.length)
       );
@@ -113,14 +159,26 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
     };
   };
 
-  const { pageOfItems, totalItemCount } = findUsers(posts, pageIndex, pageSize);
+  const { pageOfItems, totalItemCount } = findUsers(
+    posts,
+    pageIndex,
+    pageSize,
+    sortField,
+    sortDirection
+  );
 
   const pagination = {
     pageIndex,
     pageSize,
     totalItemCount,
     pageSizeOptions: [10, 0],
-    showPerPageOptions,
+  };
+
+  const sorting: EuiTableSortingType<Post> = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
   };
 
   return (
@@ -133,6 +191,7 @@ export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
       cellProps={getCellProps}
       pagination={pagination}
       onChange={onTableChange}
+      sorting={sorting}
     />
   );
 };

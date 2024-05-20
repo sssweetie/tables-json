@@ -3,6 +3,7 @@ import { EuiButtonGroup, useGeneratedHtmlId } from '@elastic/eui';
 import { useEffect, useState } from 'react';
 import { httpClient } from '../services/httpClient';
 import { PostsTable } from './PostsTable';
+import { useSearchParams } from 'react-router-dom';
 
 export interface Post {
   postId: number;
@@ -17,8 +18,12 @@ export const Posts = () => {
     prefix: 'basicButtonGroup',
   });
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const viewType = searchParams.get('viewType');
+
   const [toggleIdSelected, setToggleIdSelected] = useState(
-    `${basicButtonGroupPrefix}__0`
+    viewType ?? `${basicButtonGroupPrefix}__0`
   );
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -36,6 +41,8 @@ export const Posts = () => {
 
   const onChange = (optionId: string) => {
     setToggleIdSelected(optionId);
+    searchParams.set('viewType', optionId);
+    setSearchParams(searchParams);
   };
 
   useEffect(() => {
@@ -58,7 +65,9 @@ export const Posts = () => {
       {toggleIdSelected === `${basicButtonGroupPrefix}__1` ? (
         <PostsTable posts={posts} />
       ) : (
-        <div>{posts.length > 0 && JSON.stringify(posts)}</div>
+        <div>
+          <pre>{JSON.stringify([posts], null, 2)}</pre>
+        </div>
       )}
     </>
   );
