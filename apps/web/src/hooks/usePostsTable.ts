@@ -2,36 +2,41 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Post } from '../pages/Posts';
 import {
-  Comparators,
   Criteria,
+  EuiInMemoryTableProps,
+  EuiSearchBarOnChangeArgs,
+  EuiSearchBarProps,
   EuiTableFieldDataColumnType,
-  EuiTableSortingType,
 } from '@elastic/eui';
 
 type Direction = 'asc' | 'desc';
 type PostKeys = keyof Post;
 
-interface FindUsers {
-  posts: Post[];
-  pageIndex: number;
-  pageSize: number;
-  sortField: PostKeys;
-  sortDirection: Direction;
+interface Params {
+  pageSize: string;
+  pageIndex: string;
+  sort: string;
+  direction: string;
 }
 
-export const usePostsTable = (posts: Post[]) => {
+export const usePostsTable = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const sort = searchParams.get('sort') as PostKeys;
   const direction = searchParams.get('direction') as Direction;
+  const querySearch = searchParams.get('search');
+  const pageIndex = searchParams.get('pageIndex');
+  const pageSize = searchParams.get('pageSize');
 
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<PostKeys>(sort ?? 'id');
   const [sortDirection, setSortDirection] = useState<Direction>(
     direction ?? 'asc'
   );
+  const [pagination, setPagination] = useState<Record<string, number>>({
+    pageIndex: pageIndex ? Number(pageIndex) : 0,
+    pageSize: pageSize ? Number(pageSize) : 10,
+  });
 
   const getRowProps = ({ id }: Post) => {
     return {
@@ -54,78 +59,46 @@ export const usePostsTable = (posts: Post[]) => {
     };
   };
 
-  const onTableChange = ({ page, sort }: Criteria<Post>) => {
-    if (page) {
-      const { index: pageIndex, size: pageSize } = page;
-      setPageIndex(pageIndex);
-      setPageSize(pageSize);
-    }
-    if (sort) {
-      const { field: sortField, direction: sortDirection } = sort;
-      setSortField(sortField);
-      setSortDirection(sortDirection);
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
+      schema: true,
+    },
+    defaultQuery: querySearch as string,
+    onChange: ({ queryText }: EuiSearchBarOnChangeArgs) => {
       setSearchParams({
         ...Object.fromEntries([...searchParams]),
-        sort: sortField,
-        direction: sortDirection,
+        search: queryText,
       });
-    }
+      return true;
+    },
   };
 
-  const findUsers = ({
-    posts,
-    pageIndex,
-    pageSize,
-    sortField,
-    sortDirection,
-  }: FindUsers) => {
-    let items;
-    let pageOfItems;
+  const onTableChange = ({ page, sort }: Criteria<Post>) => {
+    const params: Partial<Params> = {};
 
-    if (sortField) {
-      items = posts
-        .slice(0)
-        .sort(
-          Comparators.property(sortField, Comparators.default(sortDirection))
-        );
-    } else {
-      items = posts;
+    if (page) {
+      const { index: pageIndex, size: pageSize } = page;
+      params.pageSize = pageSize.toString();
+      params.pageIndex = pageIndex.toString();
+      setPagination({ pageIndex, pageSize });
     }
 
-    if (!pageIndex && !pageSize) {
-      pageOfItems = items;
-    } else {
-      const startIndex = pageIndex * pageSize;
-      pageOfItems = items.slice(
-        startIndex,
-        Math.min(startIndex + pageSize, posts.length)
-      );
+    if (sort) {
+      const { field: sortField, direction: sortDirection } = sort;
+      params.sort = sortField;
+      params.direction = sortDirection;
+      setSortField(sortField);
+      setSortDirection(sortDirection);
     }
 
-    return {
-      pageOfItems,
-      totalItemCount: posts.length,
-    };
+    setSearchParams({
+      ...Object.fromEntries([...searchParams]),
+      ...params,
+    });
   };
 
-  const findUsersParams: FindUsers = {
-    posts,
-    pageIndex,
-    pageSize,
-    sortField,
-    sortDirection,
-  };
-
-  const { pageOfItems, totalItemCount } = findUsers(findUsersParams);
-
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions: [10, 0],
-  };
-
-  const sorting: EuiTableSortingType<Post> = {
+  const sorting: EuiInMemoryTableProps<Post>['sorting'] = {
     sort: {
       field: sortField,
       direction: sortDirection,
@@ -135,7 +108,7 @@ export const usePostsTable = (posts: Post[]) => {
   return {
     sorting,
     pagination,
-    pageOfItems,
+    search,
     getRowProps,
     getCellProps,
     onTableChange,

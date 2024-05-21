@@ -1,8 +1,7 @@
-import { EuiButtonGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import { PostsTable } from '../features/PostsTable';
 import { usePosts } from '../hooks/usePosts';
-import { LoadingWrapper } from './styled';
 import { Loader } from '../components/Loader';
 
 export interface Post {

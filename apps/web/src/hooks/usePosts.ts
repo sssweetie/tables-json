@@ -40,7 +40,7 @@ export const usePosts = () => {
         const res = await httpClient.get('/posts');
         setPosts(res.data);
       } catch (err) {
-        console.error(err);
+        alert(err);
       } finally {
         setIsLoading(false);
       }

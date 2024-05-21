@@ -1,4 +1,4 @@
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 
 import { FC } from 'react';
 import { Post } from '../pages/Posts';
@@ -63,25 +63,28 @@ const columns: Array<EuiBasicTableColumn<Post>> = [
 
 export const PostsTable: FC<PostsTableProps> = ({ posts }) => {
   const {
-    pageOfItems,
-    sorting,
     pagination,
+    search,
+    sorting,
     getRowProps,
     getCellProps,
     onTableChange,
-  } = usePostsTable(posts);
+  } = usePostsTable();
 
   return (
-    <EuiBasicTable
+    <EuiInMemoryTable
+      items={posts}
       tableCaption="Demo of EuiBasicTable"
-      rowHeader="firstName"
-      items={pageOfItems}
       columns={columns}
-      pagination={pagination}
       sorting={sorting}
+      search={search}
       rowProps={getRowProps}
       cellProps={getCellProps}
       onChange={onTableChange}
+      pagination={{
+        ...pagination,
+        pageSizeOptions: [10, 25, 50],
+      }}
     />
   );
 };

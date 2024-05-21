@@ -16,7 +16,7 @@ export const useDetails = () => {
         const res = await httpClient.get(`/posts/details/${id}`);
         setPost(res.data);
       } catch (err) {
-        console.log(err);
+        alert(err);
       } finally {
         setIsLoading(false);
       }
