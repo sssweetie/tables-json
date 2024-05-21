@@ -6,6 +6,7 @@ import * as ReactDOM from 'react-dom/client';
 import { Posts } from './pages/Posts';
 import { EuiProvider } from '@elastic/eui';
 import { Details } from './pages/Details';
+import { NotFound } from './pages/NotFound';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,8 +17,9 @@ root.render(
     <EuiProvider colorMode="light">
       <HashRouter>
         <Routes>
-          <Route path="/" Component={Posts}></Route>
-          <Route path="/details/:id" Component={Details}></Route>
+          <Route path="/" Component={Posts} />
+          <Route path="/details/:id" Component={Details} />
+          <Route path="*" Component={NotFound} />
         </Routes>
       </HashRouter>
     </EuiProvider>
